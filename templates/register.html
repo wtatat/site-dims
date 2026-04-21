@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+        <div class="col-md-4">
+            <div class="p-4 border border-1 border-dark">
+                <h3 class="text-center text-uppercase fw-bold mb-4" style="letter-spacing: 2px;">Регистрация</h3>
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label text-uppercase small fw-bold">Username</label>
+                        <input type="text" class="form-control rounded-0 border-dark shadow-none">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-uppercase small fw-bold">Email</label>
+                        <input type="email" class="form-control rounded-0 border-dark shadow-none">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label text-uppercase small fw-bold">Password</label>
+                        <input type="password" class="form-control rounded-0 border-dark shadow-none">
+                    </div>
+                    <button type="button" class="btn btn-dark w-100 rounded-0 text-uppercase fw-bold shadow-none" style="letter-spacing: 1px;">
+                        Создать аккаунт
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
