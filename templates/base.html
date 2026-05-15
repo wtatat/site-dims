@@ -6,21 +6,171 @@
     <title>MusicLover Project</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #fff; color: #000; font-family: 'Arial', sans-serif; }
-        .navbar { background-color: #000 !important; padding: 0.8rem 2rem; }
-        .nav-custom-style { 
-            color: #fff !important; 
-            text-transform: uppercase; 
-            letter-spacing: 1.5px; 
+        :root {
+            --site-black: #111111;
+            --site-gray: #6c757d;
+            --site-border: #d9d9d9;
+            --site-panel: #f7f4ef;
+            --site-accent: #d96b27;
+        }
+        body {
+            background:
+                radial-gradient(circle at top left, rgba(217, 107, 39, 0.08), transparent 28%),
+                linear-gradient(180deg, #fcfbf8 0%, #f3efe7 100%);
+            color: var(--site-black);
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+        }
+        .navbar { background-color: #111111 !important; padding: 0.8rem 2rem; }
+        .nav-custom-style {
+            color: #fff !important;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
             text-decoration: none;
             font-size: 0.9rem;
             font-weight: 500;
         }
         .nav-custom-style:hover { opacity: 0.8; }
-        .btn-search { 
-            border: 1px solid #fff; 
+        .search-shell {
+            position: relative;
+            width: 230px;
+            min-width: 230px;
+        }
+        .btn-search {
+            border: 1px solid #fff;
             background: transparent;
             padding: 4px 15px;
+            width: 100%;
+            text-align: center;
+        }
+        .search-input {
+            display: none;
+            width: 100%;
+            border: 1px solid #fff;
+            background: transparent;
+            color: #fff;
+            padding: 4px 12px;
+            outline: none;
+        }
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.72);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.8rem;
+        }
+        .search-shell.is-active .btn-search {
+            display: none;
+        }
+        .search-shell.is-active .search-input {
+            display: block;
+        }
+        .search-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: rgba(17, 17, 17, 0.96);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            display: none;
+            z-index: 20;
+        }
+        .search-dropdown.is-visible {
+            display: block;
+        }
+        .search-result {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 0.9rem;
+            color: #fff;
+            text-decoration: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .search-result-card {
+            padding: 0.75rem 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+        .search-result:first-child {
+            border-top: 0;
+        }
+        .search-result-card:first-child {
+            border-top: 0;
+        }
+        .search-result:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .search-result-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .search-avatar,
+        .search-avatar-fallback {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex: 0 0 34px;
+            background: #f3efe7;
+            color: #111111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .search-label {
+            display: block;
+            color: #fff;
+            line-height: 1.2;
+        }
+        .search-subtitle {
+            display: block;
+            color: rgba(255, 255, 255, 0.62);
+            font-size: 0.78rem;
+            margin-top: 0.1rem;
+        }
+        .search-result-head {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.65rem;
+        }
+        .search-result-link {
+            color: #fff;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .search-result-link:hover {
+            color: #fff;
+            opacity: 0.82;
+        }
+        .search-track-player {
+            width: 100%;
+            height: 36px;
+            filter: invert(1) hue-rotate(180deg);
+        }
+        .search-empty {
+            padding: 0.85rem 0.9rem;
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 0.86rem;
+        }
+        .form-title, .submit-btn { letter-spacing: 1px; }
+        .flash-wrapper { max-width: 1100px; }
+        .page-shell {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 0 1.5rem 3rem;
+        }
+        .surface-panel {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid var(--site-border);
+        }
+        @media (max-width: 767px) {
+            .search-shell {
+                width: 180px;
+                min-width: 180px;
+            }
         }
     </style>
 </head>
@@ -28,16 +178,152 @@
 
 <nav class="navbar navbar-expand-lg mb-4">
     <div class="container-fluid">
-        <a class="nav-custom-style" href="/">musiclover</a>
+        <a class="nav-custom-style" href="{{ url_for('index') }}">musiclover</a>
         <div class="d-flex align-items-center gap-4">
-            <button class="nav-custom-style btn-search" type="button">search</button>
-            <a class="nav-custom-style" href="/reg">register</a>
+            <div class="search-shell" data-search-shell>
+                <button class="nav-custom-style btn-search" type="button" data-search-button>search</button>
+                <input
+                    type="text"
+                    class="search-input"
+                    placeholder="поиск"
+                    autocomplete="off"
+                    data-search-input
+                >
+                <div class="search-dropdown" data-search-dropdown></div>
+            </div>
+            {% if current_user %}
+            <a class="nav-custom-style" href="{{ url_for('account') }}">{{ current_user.username }}</a>
+            <a class="nav-custom-style" href="{{ url_for('logout') }}">logout</a>
+            {% else %}
+            <a class="nav-custom-style" href="{{ url_for('login') }}">login</a>
+            <a class="nav-custom-style" href="{{ url_for('register') }}">register</a>
+            {% endif %}
         </div>
     </div>
 </nav>
 
-{% block content %}{% endblock %}
+<div class="container flash-wrapper">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} rounded-0" role="alert">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+</div>
 
+<main class="page-shell">
+    {% block content %}{% endblock %}
+</main>
+
+<script>
+    (() => {
+        const shell = document.querySelector("[data-search-shell]");
+        if (!shell) return;
+
+        const button = shell.querySelector("[data-search-button]");
+        const input = shell.querySelector("[data-search-input]");
+        const dropdown = shell.querySelector("[data-search-dropdown]");
+        let activeRequest = 0;
+
+        const escapeHtml = (value) =>
+            value
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#39;");
+
+        const closeSearch = () => {
+            shell.classList.remove("is-active");
+            dropdown.classList.remove("is-visible");
+            dropdown.innerHTML = "";
+            input.value = "";
+        };
+
+        const openSearch = () => {
+            shell.classList.add("is-active");
+            input.focus();
+        };
+
+        const renderResults = (items) => {
+            if (!items.length) {
+                dropdown.innerHTML = '<div class="search-empty">Ничего не найдено.</div>';
+                dropdown.classList.add("is-visible");
+                return;
+            }
+
+            dropdown.innerHTML = items.map((item) => {
+                if (item.type === "track") {
+                    return `
+                        <div class="search-result-card">
+                            <div class="search-result-head">
+                                <div class="search-avatar-fallback">${escapeHtml(item.label.slice(0, 1))}</div>
+                                <span>
+                                    <span class="search-label">${escapeHtml(item.label)}</span>
+                                    <a href="${escapeHtml(item.url)}" class="search-subtitle search-result-link">${escapeHtml(item.subtitle)}</a>
+                                </span>
+                            </div>
+                            <audio controls preload="none" class="search-track-player">
+                                <source src="${escapeHtml(item.audio_url)}">
+                            </audio>
+                        </div>
+                    `;
+                }
+
+                const avatar = item.avatar_url
+                    ? `<img src="${escapeHtml(item.avatar_url)}" alt="" class="search-avatar">`
+                    : `<div class="search-avatar-fallback">${escapeHtml(item.label.slice(0, 1))}</div>`;
+
+                return `
+                    <a href="${escapeHtml(item.url)}" class="search-result">
+                        ${avatar}
+                        <span>
+                            <span class="search-label">${escapeHtml(item.label)}</span>
+                            <span class="search-subtitle">${escapeHtml(item.subtitle)}</span>
+                        </span>
+                    </a>
+                `;
+            }).join("");
+            dropdown.classList.add("is-visible");
+        };
+
+        const fetchResults = async (query) => {
+            const requestId = ++activeRequest;
+            const response = await fetch(`/search?q=${encodeURIComponent(query)}`);
+            if (!response.ok || requestId !== activeRequest) return;
+            const items = await response.json();
+            if (requestId !== activeRequest) return;
+            renderResults(items);
+        };
+
+        button.addEventListener("click", openSearch);
+
+        input.addEventListener("input", () => {
+            const query = input.value.trim();
+            if (!query) {
+                dropdown.classList.remove("is-visible");
+                dropdown.innerHTML = "";
+                return;
+            }
+            fetchResults(query);
+        });
+
+        input.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+                closeSearch();
+            }
+        });
+
+        document.addEventListener("click", (event) => {
+            if (!shell.contains(event.target)) {
+                closeSearch();
+            }
+        });
+    })();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

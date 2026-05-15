@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .account-hero {
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid #d9d9d9;
+        padding: 2rem;
+    }
+    .avatar-stack {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+    .account-avatar,
+    .account-avatar-fallback {
+        width: 164px;
+        height: 164px;
+        border-radius: 50%;
+        border: 3px solid #111111;
+        object-fit: cover;
+        background: #f3efe7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .account-avatar-fallback {
+        font-size: 3rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #111111;
+    }
+    .profile-name {
+        font-size: clamp(2rem, 4vw, 3.25rem);
+        text-transform: uppercase;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    .profile-actions {
+        margin-bottom: 1.5rem;
+    }
+    .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
+        gap: 1rem;
+        max-width: 360px;
+    }
+    .stat-tile {
+        border-top: 2px solid #111111;
+        padding-top: 0.75rem;
+    }
+    .stat-value {
+        display: block;
+        font-size: 1.8rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+    .stat-label {
+        color: #6c757d;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+    }
+    .track-columns {
+        margin-top: 1.5rem;
+    }
+    .track-panel {
+        background: rgba(255, 255, 255, 0.84);
+        border: 1px solid #d9d9d9;
+        height: 100%;
+        padding: 1.5rem;
+    }
+    .track-panel-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+    .track-title {
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        margin: 0;
+    }
+    .track-upload-form {
+        display: grid;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    .track-upload-form .form-control {
+        border-radius: 0;
+    }
+    .placeholder-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 0.75rem;
+    }
+    .placeholder-item {
+        border: 1px dashed #c3beb5;
+        padding: 1rem;
+        background: #fcfaf6;
+    }
+    .track-item-title {
+        display: block;
+        font-weight: 700;
+        margin-bottom: 0.45rem;
+    }
+    .track-item-meta {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-bottom: 0.75rem;
+    }
+    .avatar-form .form-control {
+        border-radius: 0;
+    }
+    audio {
+        width: 100%;
+    }
+    @media (max-width: 767px) {
+        .account-hero {
+            padding: 1.5rem;
+        }
+        .stat-grid {
+            max-width: 100%;
+        }
+    }
+</style>
+
+<section class="account-hero">
+    <div class="row align-items-center g-4">
+        <div class="col-lg-4">
+            <div class="avatar-stack">
+                {% if avatar_url %}
+                <img src="{{ avatar_url }}" alt="Аватар пользователя" class="account-avatar">
+                {% else %}
+                <div class="account-avatar-fallback">{{ profile_user.username[:1] }}</div>
+                {% endif %}
+
+                {% if is_own_profile %}
+                <form method="post" enctype="multipart/form-data" class="w-100 avatar-form">
+                    {{ avatar_form.hidden_tag() }}
+                    <input type="hidden" name="action" value="update_avatar">
+                    <div class="mb-2">
+                        {{ avatar_form.avatar(class="form-control border-dark shadow-none") }}
+                        {% for error in avatar_form.avatar.errors %}
+                        <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {{ avatar_form.submit(class="btn btn-dark w-100 rounded-0 text-uppercase shadow-none") }}
+                </form>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="ps-lg-3">
+                <div class="profile-name">{{ profile_user.username }}</div>
+                <p class="text-muted mb-3">{{ profile_user.email }}</p>
+
+                <div class="profile-actions">
+                    {% if not is_own_profile and current_user %}
+                    <form method="post">
+                        <input type="hidden" name="action" value="toggle_follow">
+                        <button type="submit" class="btn btn-dark rounded-0 text-uppercase">
+                            {% if is_following %}Отписаться{% else %}Подписаться{% endif %}
+                        </button>
+                    </form>
+                    {% elif not current_user %}
+                    <a href="{{ url_for('login') }}" class="btn btn-dark rounded-0 text-uppercase">Войти, чтобы подписаться</a>
+                    {% endif %}
+                </div>
+
+                <div class="stat-grid">
+                    <div class="stat-tile">
+                        <span class="stat-value">{{ followers_count }}</span>
+                        <span class="stat-label">Подписчики</span>
+                    </div>
+                    <div class="stat-tile">
+                        <span class="stat-value">{{ uploaded_tracks_count }}</span>
+                        <span class="stat-label">Загружено треков</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="track-columns">
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="track-panel">
+                <div class="track-panel-head">
+                    <div class="track-title">{% if is_own_profile %}Ваши треки{% else %}Его треки{% endif %}</div>
+                    {% if is_own_profile %}
+                    <button
+                        class="btn btn-dark rounded-0 text-uppercase"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#uploadTrackForm"
+                        aria-expanded="false"
+                        aria-controls="uploadTrackForm"
+                    >
+                        Загрузить трек
+                    </button>
+                    {% endif %}
+                </div>
+
+                {% if is_own_profile %}
+                <div class="collapse mb-3" id="uploadTrackForm">
+                    <form method="post" enctype="multipart/form-data" class="track-upload-form">
+                        {{ track_form.hidden_tag() }}
+                        <input type="hidden" name="action" value="upload_track">
+                        <div>
+                            {{ track_form.title(class="form-control border-dark shadow-none", placeholder="Название трека") }}
+                            {% for error in track_form.title.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        <div>
+                            {{ track_form.track_file(class="form-control border-dark shadow-none") }}
+                            {% for error in track_form.track_file.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        {{ track_form.submit(class="btn btn-dark rounded-0 text-uppercase shadow-none") }}
+                    </form>
+                </div>
+                {% endif %}
+
+                {% if own_tracks %}
+                <ul class="placeholder-list">
+                    {% for track in own_tracks %}
+                    <li class="placeholder-item">
+                        <span class="track-item-title">{{ track.title }}</span>
+                        <div class="track-item-meta">Загрузил <a href="{{ track.profile_url }}" class="link-dark">{{ track.artist }}</a></div>
+                        <audio controls preload="none">
+                            <source src="{{ track.url }}">
+                        </audio>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <ul class="placeholder-list">
+                    <li class="placeholder-item">загруженные пользователем треки</li>
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="track-panel">
+                <div class="track-title">Лайкнутые треки</div>
+                {% if liked_tracks %}
+                <ul class="placeholder-list">
+                    {% for track in liked_tracks %}
+                    <li class="placeholder-item">{{ track }}</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <ul class="placeholder-list">
+                    <li class="placeholder-item">лайкнутые треки</li>
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

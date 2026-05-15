@@ -1,17 +1,82 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container-fluid px-5 mt-5">
-    <div class="row">
-        <!-- левая половина -->
-        <div class="col-6">
-            <h2 class="text-start text-uppercase fw-bold">недавно прослушано</h2>
-            <p class="text-muted small mt-4">Скоро</p>
+<style>
+    .hero-title {
+        font-size: clamp(2rem, 4vw, 3rem);
+        text-transform: uppercase;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    .popular-panel {
+        height: 100%;
+        background: rgba(255, 255, 255, 0.72);
+        border: 1px solid #d9d9d9;
+        padding: 1.5rem;
+    }
+    .popular-title {
+        font-size: 1rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+    .popular-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 0.8rem;
+    }
+    .popular-item {
+        border-bottom: 1px solid #ece4d8;
+        padding-bottom: 0.8rem;
+    }
+    .popular-item:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+    }
+    .popular-track-title {
+        font-weight: 700;
+        display: block;
+        margin-bottom: 0.2rem;
+    }
+    .popular-track-meta {
+        color: #6c757d;
+        font-size: 0.92rem;
+        margin-bottom: 0.65rem;
+    }
+    .popular-track-player {
+        width: 100%;
+        max-width: 340px;
+        height: 36px;
+    }
+</style>
+
+<div class="surface-panel p-4 p-md-5">
+    <div class="row align-items-start g-4">
+        <div class="col-md-6">
+            <div class="hero-title">Musiclover</div>
+            <p class="text-muted mt-4 mb-0">Самая лучшая площадка для молодежных артистов и слушателей😎🤙 сикс севен черемша куки ты не такая как все лайк если любишь маму</p>
         </div>
-        
-        <!-- правая половина -->
-        <div class="col-6">
-            <h2 class="text-end text-uppercase fw-bold">вторая</h2>
+        <div class="col-md-6">
+            <div class="popular-panel">
+                <div class="popular-title">Популярные треки за последний месяц</div>
+                {% if popular_tracks %}
+                <ul class="popular-list">
+                    {% for track in popular_tracks %}
+                    <li class="popular-item">
+                        <span class="popular-track-title">{{ track.title }}</span>
+                        <div class="popular-track-meta">от <a href="{{ track.profile_url }}" class="link-dark">{{ track.artist }}</a></div>
+                        <audio controls preload="none" class="popular-track-player">
+                            <source src="{{ track.url }}">
+                        </audio>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted mb-0">Когда пользователи начнут загружать треки, последние из них появятся здесь.</p>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>
