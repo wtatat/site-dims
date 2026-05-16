@@ -1,7 +1,7 @@
 import secrets
 from pathlib import Path
 
-from flask import Flask, flash, jsonify, redirect, render_template, request, session, url_for
+from flask import Flask, flash, jsonify, redirect, render_template, request, send_from_directory, session, url_for
 
 from data import db_session
 from data.tracks import Track
@@ -115,6 +115,16 @@ def index():
     finally:
         db_sess.close()
     return render_template("index.html", popular_tracks=popular_tracks)
+
+
+@app.route("/cookan")
+def cookan():
+    return render_template("cookan.html")
+
+
+@app.route("/cookan.png")
+def cookan_image():
+    return send_from_directory(BASE_DIR, "cookan.png")
 
 
 @app.route("/register", methods=["GET", "POST"])
