@@ -1,3 +1,4 @@
+import os
 import secrets
 from pathlib import Path
 
@@ -315,7 +316,8 @@ def logout():
 
 def main():
     ensure_upload_directories()
-    app.run(port=8080)
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
 
 
 if __name__ == "__main__":
